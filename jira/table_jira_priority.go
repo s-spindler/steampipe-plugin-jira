@@ -85,9 +85,11 @@ func listPriorities(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	}
 	priorities := new([]jira.Priority)
 
-	_, err = client.Do(req, priorities)
+	res, err := client.Do(req, priorities)
 	if err != nil {
+		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_priority.listPriorities", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_priority.listPriorities", "response", res.Body)
 		return nil, err
 	}
 
@@ -125,9 +127,11 @@ func getPriority(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	}
 	result := new(jira.Priority)
 
-	_, err = client.Do(req, result)
+	res, err := client.Do(req, result)
 	if err != nil {
+		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_priority.getPriority", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_priority.getPriority", "response", res.Body)
 		return nil, err
 	}
 

@@ -96,9 +96,11 @@ func listGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		}
 
 		listGroupResult := new(ListGroupResult)
-		_, err = client.Do(req, listGroupResult)
+		res, err := client.Do(req, listGroupResult)
 		if err != nil {
+			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_group.listGroups", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_group.listGroups", "response", res.Body)
 			return nil, err
 		}
 
@@ -140,9 +142,11 @@ func getGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		return nil, err
 	}
 
-	_, err = client.Do(req, listGroupResult)
+	res, err := client.Do(req, listGroupResult)
 	if err != nil {
+		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_group.getGroup", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_group.getGroup", "response", res.Body)
 		return nil, err
 	}
 
@@ -182,10 +186,12 @@ func getGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 		chunk, resp, err := client.Group.GetWithOptions(group.Name, opts)
 		if err != nil {
+			defer resp.Body.Close()
 			if isNotFoundError(err) {
 				return groupMembers, nil
 			}
 			plugin.Logger(ctx).Error("jira_group.getGroupMembers", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", resp.Body)
 			return nil, err
 		}
 

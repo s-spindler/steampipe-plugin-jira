@@ -100,7 +100,9 @@ func listBoards(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 			SearchOptions: opt,
 		})
 		if err != nil {
+			defer resp.Body.Close()
 			plugin.Logger(ctx).Error("jira_board.listBoards", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", resp.Body)
 			return nil, err
 		}
 
@@ -134,12 +136,14 @@ func getBoard(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		return nil, err
 	}
 
-	board, _, err := client.Board.GetBoard(int(boardId))
+	board, res, err := client.Board.GetBoard(int(boardId))
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_board.getBoard", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_board.getBoard", "response", res.Body)
 		return nil, err
 	}
 
@@ -155,9 +159,11 @@ func getBoardConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		return nil, err
 	}
 
-	boardConfiguration, _, err := client.Board.GetBoardConfiguration(board.ID)
+	boardConfiguration, res, err := client.Board.GetBoardConfiguration(board.ID)
 	if err != nil {
+		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_board.getBoardConfiguration", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_board.getBoardConfiguration", "response", res.Body)
 		return nil, err
 	}
 

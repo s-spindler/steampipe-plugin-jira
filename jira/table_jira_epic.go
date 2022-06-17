@@ -105,9 +105,11 @@ func listEpics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		}
 
 		listResult := new(ListEpicResult)
-		_, err = client.Do(req, listResult)
+		res, err := client.Do(req, listResult)
 		if err != nil {
+			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_epic.listEpics", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_epic.listEpics", "response", res.Body)
 			return nil, err
 		}
 
@@ -155,12 +157,14 @@ func getEpic(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	}
 
 	epic := new(Epic)
-	_, err = client.Do(req, epic)
+	res, err := client.Do(req, epic)
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) || strings.Contains(err.Error(), "400") {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_epic.getEpic", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_epic.getEpic", "response", res.Body)
 		return nil, err
 	}
 

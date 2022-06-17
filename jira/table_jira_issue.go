@@ -260,10 +260,12 @@ func listIssues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		issues, resp, err := client.Issue.SearchWithContext(ctx, jql, &options)
 
 		if err != nil {
+			defer resp.Body.Close()
 			if isNotFoundError(err) || strings.Contains(err.Error(), "400") {
 				return nil, nil
 			}
 			plugin.Logger(ctx).Error("jira_issue.listIssues", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", resp.Body)
 			return nil, err
 		}
 
@@ -312,14 +314,16 @@ func getIssue(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		return nil, nil
 	}
 
-	issue, _, err := client.Issue.Get(id, &jira.GetQueryOptions{
+	issue, res, err := client.Issue.Get(id, &jira.GetQueryOptions{
 		Expand: "names",
 	})
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_issue.getIssue", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_issue.getIssue", "response", res.Body)
 		return nil, err
 	}
 

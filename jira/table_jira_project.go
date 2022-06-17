@@ -167,9 +167,11 @@ func listProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 
 		projectList := new(ProjectListResult)
-		_, err = client.Do(req, projectList)
+		res, err := client.Do(req, projectList)
 		if err != nil {
+			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_project.listProjects", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", res.Body)
 			return nil, err
 		}
 
@@ -216,12 +218,14 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	}
 
 	project := new(Project)
-	_, err = client.Do(req, project)
+	res, err := client.Do(req, project)
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_project.getProject", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_project.getProject", "response", res.Body)
 		return nil, err
 	}
 

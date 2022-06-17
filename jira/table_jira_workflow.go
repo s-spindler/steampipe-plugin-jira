@@ -105,9 +105,11 @@ func listWorkflows(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		}
 
 		listResult := new(ListWorkflowResult)
-		_, err = client.Do(req, listResult)
+		res, err := client.Do(req, listResult)
 		if err != nil {
+			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_workflow.listWorkflows", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_workflow.listWorkflows", "response", res.Body)
 			return nil, err
 		}
 
@@ -153,9 +155,11 @@ func getWorkflow(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	}
 
 	workflow := new(ListWorkflowResult)
-	_, err = client.Do(req, workflow)
+	res, err := client.Do(req, workflow)
 	if err != nil {
+		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_workflow.getWorkflow", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_workflow.getWorkflow", "response", res.Body)
 		return nil, err
 	}
 	if len(workflow.Values) < 1 {

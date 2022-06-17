@@ -128,9 +128,11 @@ func listDashboards(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 
 		listResult := new(ListResult)
-		_, err = client.Do(req, listResult)
+		res, err := client.Do(req, listResult)
 		if err != nil {
+			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_dashboard.listDashboards", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_dashboard.listDashboards", "response", res.Body)
 			return nil, err
 		}
 
@@ -171,12 +173,14 @@ func getDashboard(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	_, err = client.Do(req, dashboard)
+	res, err := client.Do(req, dashboard)
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_dashboard.getDashboard", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_dashboard.getDashboard", "response", res.Body)
 		return nil, err
 	}
 

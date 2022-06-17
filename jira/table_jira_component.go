@@ -159,12 +159,14 @@ func listComponents(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		}
 
 		listResult := new(ListComponentResult)
-		_, err = client.Do(req, listResult)
+		res, err := client.Do(req, listResult)
 		if err != nil {
+			defer res.Body.Close()
 			if isNotFoundError(err) {
 				return nil, nil
 			}
 			plugin.Logger(ctx).Error("jira_component.listComponents", "api_error", err)
+			plugin.Logger(ctx).Debug("jira_component.listComponents", "response", res.Body)
 			return nil, err
 		}
 
@@ -205,9 +207,11 @@ func getComponent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	result := new(Component)
 
-	_, err = client.Do(req, result)
+	res, err := client.Do(req, result)
 	if err != nil {
+		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_component.getComponent", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_component.getComponent", "response", res.Body)
 		return nil, err
 	}
 

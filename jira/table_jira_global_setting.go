@@ -81,12 +81,14 @@ func listGlobalSettings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	listGlobalSettings := new(GlobalSetting)
-	_, err = client.Do(req, listGlobalSettings)
+	res, err := client.Do(req, listGlobalSettings)
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_global_setting.listGlobalSettings", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_global_setting.listGlobalSettings", "response", res.Body)
 		return nil, err
 	}
 

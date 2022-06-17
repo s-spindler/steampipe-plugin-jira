@@ -94,12 +94,14 @@ func listAdvancedSettings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	}
 
 	listAdvancedSettings := new([]AdvancedApplicationProperty)
-	_, err = client.Do(req, listAdvancedSettings)
+	res, err := client.Do(req, listAdvancedSettings)
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) {
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_advanced_setting.listAdvancedSettings", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_advanced_setting.listAdvancedSettings", "response", res.Body)
 		return nil, err
 	}
 
@@ -131,8 +133,9 @@ func getAdvancedSettingProperty(ctx context.Context, d *plugin.QueryData, _ *plu
 
 	result := new(AdvancedApplicationProperty)
 
-	_, err = client.Do(req, result)
+	res, err := client.Do(req, result)
 	if err != nil {
+		defer res.Body.Close()
 		if isNotFoundError(err) {
 			return nil, nil
 		}
@@ -140,6 +143,7 @@ func getAdvancedSettingProperty(ctx context.Context, d *plugin.QueryData, _ *plu
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_advanced_setting.getAdvancedSettingProperty", "api_error", err)
+		plugin.Logger(ctx).Debug("jira_advanced_setting.listAdvancedSettings", "response", res.Body)
 		return nil, err
 	}
 
