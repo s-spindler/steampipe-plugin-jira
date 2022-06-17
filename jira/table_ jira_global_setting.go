@@ -74,7 +74,7 @@ func listGlobalSettings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	req, err := client.NewRequest("GET", "/rest/api/3/configuration", nil)
+	req, err := client.NewRequest("GET", "/rest/api/2/configuration", nil)
 	if err != nil {
 		plugin.Logger(ctx).Error("jira_global_setting.listGlobalSettings", "get_request_error", err)
 		return nil, err

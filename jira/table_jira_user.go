@@ -105,7 +105,7 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 
 	last := 0
 	for {
-		apiEndpoint := fmt.Sprintf("rest/api/2/users/search?startAt=%d&maxResults=%d", last, maxResults)
+		apiEndpoint := fmt.Sprintf("rest/api/2/user/search?startAt=%d&maxResults=%d", last, maxResults)
 
 		req, err := client.NewRequest("GET", apiEndpoint, nil)
 		if err != nil {

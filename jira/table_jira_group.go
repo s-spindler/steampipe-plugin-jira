@@ -84,7 +84,7 @@ func listGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	}
 	for {
 		apiEndpoint := fmt.Sprintf(
-			"/rest/api/3/group/bulk?startAt=%d&maxResults=%d",
+			"/rest/api/2/group/bulk?startAt=%d&maxResults=%d",
 			last,
 			maxResults,
 		)
@@ -133,7 +133,7 @@ func getGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		return nil, err
 	}
 
-	apiEndpoint := fmt.Sprintf("/rest/api/3/group/bulk?groupId=%s", groupId)
+	apiEndpoint := fmt.Sprintf("/rest/api/2/group/bulk?groupId=%s", groupId)
 	req, err := client.NewRequest("GET", apiEndpoint, nil)
 	if err != nil {
 		plugin.Logger(ctx).Error("jira_group.getGroup", "get_request_error", err)

@@ -150,7 +150,7 @@ func listComponents(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	for {
-		apiEndpoint := fmt.Sprintf("/rest/api/3/project/%s/component?startAt=%d&maxResults=%d", project.ID, last, maxResults)
+		apiEndpoint := fmt.Sprintf("/rest/api/2/project/%s/components?startAt=%d&maxResults=%d", project.ID, last, maxResults)
 
 		req, err := client.NewRequest("GET", apiEndpoint, nil)
 		if err != nil {
@@ -195,7 +195,7 @@ func getComponent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	apiEndpoint := fmt.Sprintf("/rest/api/3/component/%s", componentId)
+	apiEndpoint := fmt.Sprintf("/rest/api/2/component/%s", componentId)
 
 	req, err := client.NewRequest("GET", apiEndpoint, nil)
 	if err != nil {

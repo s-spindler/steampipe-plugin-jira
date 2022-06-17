@@ -87,7 +87,7 @@ func listAdvancedSettings(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		return nil, err
 	}
 
-	req, err := client.NewRequest("GET", "/rest/api/3/application-properties/advanced-settings", nil)
+	req, err := client.NewRequest("GET", "/rest/api/2/application-properties/advanced-settings", nil)
 	if err != nil {
 		plugin.Logger(ctx).Error("jira_advanced_setting.listAdvancedSettings", "get_request_error", err)
 		return nil, err
@@ -120,7 +120,7 @@ func getAdvancedSettingProperty(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-	apiEndpoint := fmt.Sprintf("/rest/api/3/application-properties?key=%s", ID)
+	apiEndpoint := fmt.Sprintf("/rest/api/2/application-properties?key=%s", ID)
 
 	req, err := client.NewRequest("GET", apiEndpoint, nil)
 	if err != nil {

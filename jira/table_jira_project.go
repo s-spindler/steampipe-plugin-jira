@@ -152,7 +152,7 @@ func listProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	last := 0
 	for {
 		apiEndpoint := fmt.Sprintf(
-			"rest/api/3/project/search?expand=description,lead,issueTypes,url,projectKeys,permissions,insight&startAt=%d&maxResults=%d", last,
+			"rest/2/project/search?expand=description,lead,issueTypes,url,projectKeys,permissions,insight&startAt=%d&maxResults=%d", last,
 			maxResults,
 		)
 

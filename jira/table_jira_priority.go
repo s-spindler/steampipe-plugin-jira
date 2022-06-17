@@ -78,7 +78,7 @@ func listPriorities(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, err
 	}
 
-	req, err := client.NewRequest("GET", "rest/api/3/priority", nil)
+	req, err := client.NewRequest("GET", "rest/2/priority", nil)
 	if err != nil {
 		plugin.Logger(ctx).Error("jira_priority.listPriorities", "get_request_error", err)
 		return nil, err
@@ -117,7 +117,7 @@ func getPriority(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, nil
 	}
 
-	apiEndpoint := fmt.Sprintf("/rest/api/3/priority/%s", priorityId)
+	apiEndpoint := fmt.Sprintf("/rest/api/2/priority/%s", priorityId)
 	req, err := client.NewRequest("GET", apiEndpoint, nil)
 	if err != nil {
 		plugin.Logger(ctx).Error("jira_priority.getPriority", "get_request_error", err)

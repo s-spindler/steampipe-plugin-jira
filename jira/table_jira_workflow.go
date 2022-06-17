@@ -93,7 +93,7 @@ func listWorkflows(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	last := 0
 	for {
 		apiEndpoint := fmt.Sprintf(
-			"/rest/api/3/workflow/search?startAt=%d&maxResults=%d&expand=transitions,transitions.rules,statuses,statuses.properties,default",
+			"/rest/api/2/workflow/search?startAt=%d&maxResults=%d&expand=transitions,transitions.rules,statuses,statuses.properties,default",
 			last,
 			maxResults,
 		)
@@ -142,7 +142,7 @@ func getWorkflow(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	}
 
 	apiEndpoint := fmt.Sprintf(
-		"/rest/api/3/workflow/search?workflowName=%s&expand=transitions,transitions.rules,statuses,statuses.properties,default",
+		"/rest/api/2/workflow/search?workflowName=%s&expand=transitions,transitions.rules,statuses,statuses.properties,default",
 		workflowName,
 	)
 

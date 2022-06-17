@@ -107,7 +107,7 @@ func listIssueTypes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 	// https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-types/
 	// Paging not supported
-	req, err := client.NewRequest("GET", "/rest/api/3/issuetype", nil)
+	req, err := client.NewRequest("GET", "/rest/api/2/issuetype", nil)
 	if err != nil {
 		if isNotFoundError(err) || strings.Contains(err.Error(), "400") {
 			return nil, nil
@@ -148,7 +148,7 @@ func getIssueType(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	apiEndpoint := fmt.Sprintf("/rest/api/3/issuetype/%s", issueTypeID)
+	apiEndpoint := fmt.Sprintf("/rest/api/2/issuetype/%s", issueTypeID)
 	req, err := client.NewRequest("GET", apiEndpoint, nil)
 	if err != nil {
 		plugin.Logger(ctx).Error("jira_issue_type.getIssueType", "get_request_error", err)
