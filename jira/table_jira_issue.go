@@ -254,7 +254,7 @@ func listIssues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	}
 
 	jql := buildJQLQueryFromQuals(d.Quals, d.Table.Columns)
-	plugin.Logger(ctx).Debug("jira_issue.listIssues", "JQL", jql)
+	plugin.Logger(ctx).Error("jira_issue.listIssues", "JQL", jql)
 
 	for {
 		issues, resp, err := client.Issue.SearchWithContext(ctx, jql, &options)
@@ -265,7 +265,7 @@ func listIssues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 				return nil, nil
 			}
 			plugin.Logger(ctx).Error("jira_issue.listIssues", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", resp.Body)
+			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(resp))
 			return nil, err
 		}
 
@@ -323,7 +323,7 @@ func getIssue(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_issue.getIssue", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_issue.getIssue", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_issue.getIssue", "response", slurpBody(res))
 		return nil, err
 	}
 

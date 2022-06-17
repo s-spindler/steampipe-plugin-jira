@@ -100,7 +100,7 @@ func listGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		if err != nil {
 			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_group.listGroups", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_group.listGroups", "response", res.Body)
+			plugin.Logger(ctx).Error("jira_group.listGroups", "response", slurpBody(res))
 			return nil, err
 		}
 
@@ -146,7 +146,7 @@ func getGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 	if err != nil {
 		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_group.getGroup", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_group.getGroup", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_group.getGroup", "response", slurpBody(res))
 		return nil, err
 	}
 
@@ -191,7 +191,7 @@ func getGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 				return groupMembers, nil
 			}
 			plugin.Logger(ctx).Error("jira_group.getGroupMembers", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", resp.Body)
+			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(resp))
 			return nil, err
 		}
 

@@ -132,7 +132,7 @@ func listDashboards(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		if err != nil {
 			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_dashboard.listDashboards", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_dashboard.listDashboards", "response", res.Body)
+			plugin.Logger(ctx).Error("jira_dashboard.listDashboards", "response", slurpBody(res))
 			return nil, err
 		}
 
@@ -180,7 +180,7 @@ func getDashboard(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_dashboard.getDashboard", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_dashboard.getDashboard", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_dashboard.getDashboard", "response", slurpBody(res))
 		return nil, err
 	}
 

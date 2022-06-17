@@ -82,7 +82,7 @@ func listProjectRoles(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	if err != nil {
 		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_project_role.listProjectRoles", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_project_role.listProjectRoles", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_project_role.listProjectRoles", "response", slurpBody(res))
 		return nil, err
 	}
 
@@ -119,7 +119,7 @@ func getProjectRole(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_project_role.getProjectRole", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_project_role.getProjectRole", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_project_role.getProjectRole", "response", slurpBody(res))
 		return nil, err
 	}
 

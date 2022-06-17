@@ -245,7 +245,7 @@ func listBacklogIssues(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		if err != nil {
 			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_backlog_issue.listBacklogIssues", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_backlog_issue.listBacklogIssues", "response", res.Body)
+			plugin.Logger(ctx).Error("jira_backlog_issue.listBacklogIssues", "response", slurpBody(res))
 			return nil, err
 		}
 

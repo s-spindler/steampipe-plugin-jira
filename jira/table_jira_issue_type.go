@@ -120,7 +120,7 @@ func listIssueTypes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	res, err := client.Do(req, issuesTypeResult)
 	if err != nil {
 		defer res.Body.Close()
-		plugin.Logger(ctx).Debug("jira_issue_type.listIssueTypes", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_issue_type.listIssueTypes", "response", slurpBody(res))
 		return nil, err
 	}
 
@@ -161,7 +161,7 @@ func getIssueType(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if err != nil && isNotFoundError(err) {
 		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_issue_type.getIssueType", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_issue_type.getIssueType", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_issue_type.getIssueType", "response", slurpBody(res))
 		return nil, nil
 	}
 

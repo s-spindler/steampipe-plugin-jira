@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -145,4 +146,12 @@ func buildJQLQueryFromQuals(equalQuals plugin.KeyColumnQualMap, tableColumns []*
 
 func getIssueJQLKey(columnName string) string {
 	return strings.ToLower(strings.Split(columnName, "_")[0])
+}
+
+func slurpBody(res *jira.Response) string {
+	bodyBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+	return string(bodyBytes)
 }

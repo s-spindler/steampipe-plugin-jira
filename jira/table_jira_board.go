@@ -102,7 +102,7 @@ func listBoards(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		if err != nil {
 			defer resp.Body.Close()
 			plugin.Logger(ctx).Error("jira_board.listBoards", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", resp.Body)
+			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(resp))
 			return nil, err
 		}
 
@@ -143,7 +143,7 @@ func getBoard(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_board.getBoard", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_board.getBoard", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_board.getBoard", "response", slurpBody(res))
 		return nil, err
 	}
 
@@ -163,7 +163,7 @@ func getBoardConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	if err != nil {
 		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_board.getBoardConfiguration", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_board.getBoardConfiguration", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_board.getBoardConfiguration", "response", slurpBody(res))
 		return nil, err
 	}
 

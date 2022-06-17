@@ -166,7 +166,7 @@ func listComponents(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 				return nil, nil
 			}
 			plugin.Logger(ctx).Error("jira_component.listComponents", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_component.listComponents", "response", res.Body)
+			plugin.Logger(ctx).Error("jira_component.listComponents", "response", slurpBody(res))
 			return nil, err
 		}
 
@@ -211,7 +211,7 @@ func getComponent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if err != nil {
 		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_component.getComponent", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_component.getComponent", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_component.getComponent", "response", slurpBody(res))
 		return nil, err
 	}
 

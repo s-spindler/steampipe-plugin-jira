@@ -171,7 +171,7 @@ func listProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		if err != nil {
 			defer res.Body.Close()
 			plugin.Logger(ctx).Error("jira_project.listProjects", "api_error", err)
-			plugin.Logger(ctx).Debug("jira_project.listProjects", "response", res.Body)
+			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(res))
 			return nil, err
 		}
 
@@ -225,7 +225,7 @@ func getProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 			return nil, nil
 		}
 		plugin.Logger(ctx).Error("jira_project.getProject", "api_error", err)
-		plugin.Logger(ctx).Debug("jira_project.getProject", "response", res.Body)
+		plugin.Logger(ctx).Error("jira_project.getProject", "response", slurpBody(res))
 		return nil, err
 	}
 
