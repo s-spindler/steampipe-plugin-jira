@@ -34,6 +34,12 @@ func tableUser(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "username",
+				Description: "The username of the user.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromGo(),
+			},
+			{
 				Name:        "account_id",
 				Description: "The account ID of the user, which uniquely identifies the user across all Atlassian products. For example, 5b10ac8d82e05b22cc7d4ef5.",
 				Type:        proto.ColumnType_STRING,
@@ -105,7 +111,7 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 
 	last := 0
 	for {
-		apiEndpoint := fmt.Sprintf("rest/api/2/user/search?startAt=%d&maxResults=%d", last, maxResults)
+		apiEndpoint := fmt.Sprintf("rest/api/2/user/search?username=.&startAt=%d&maxResults=%d", last, maxResults)
 
 		req, err := client.NewRequest("GET", apiEndpoint, nil)
 		if err != nil {
@@ -113,7 +119,7 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 			return nil, err
 		}
 
-		users := new([]jira.User)
+		users := new([]UserWithName)
 		res, err := client.Do(req, users)
 		if err != nil {
 			defer res.Body.Close()
@@ -144,7 +150,7 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 //// HYDRATE FUNCTIONS
 
 func getUserGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	user := h.Item.(jira.User)
+	user := h.Item.(UserWithName)
 
 	client, err := connect(ctx, d)
 	if err != nil {
@@ -152,7 +158,16 @@ func getUserGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, err
 	}
 
-	groups, res, err := client.User.GetGroups(user.AccountID)
+	apiEndpoint := fmt.Sprintf("rest/api/2/user?username=%s&expand=groups", user.Name)
+
+	req, err := client.NewRequest("GET", apiEndpoint, nil)
+	if err != nil {
+		plugin.Logger(ctx).Error("jira_user.listUsers", "get_request_error", err)
+		return nil, err
+	}
+
+	var userWithGroups UserWithGroups
+	res, err := client.Do(req, &userWithGroups)
 	if err != nil {
 		defer res.Body.Close()
 		plugin.Logger(ctx).Error("jira_user.getUserGroups", "api_error", err)
@@ -160,7 +175,7 @@ func getUserGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, err
 	}
 
-	return groups, nil
+	return &userWithGroups.Groups.Items, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -172,4 +187,19 @@ func groupNames(_ context.Context, d *transform.TransformData) (interface{}, err
 		groupNames = append(groupNames, group.Name)
 	}
 	return groupNames, nil
+}
+
+type UserWithGroups struct {
+	jira.User
+	Groups UserGroups `json:"groups,omitempty" structs:"groups,omitempty"`
+}
+
+type UserGroups struct {
+	Size  int              `json:"size,omitempty" structs:"size,omitempty"`
+	Items []jira.UserGroup `json:"items,omitempty" structs:"items,omitempty"`
+}
+
+type UserWithName struct {
+	jira.User
+	Username string `json:"name,omitempty" structs:"username,omitempty"`
 }

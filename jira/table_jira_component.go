@@ -138,52 +138,36 @@ func listComponents(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 
-	last := 0
-	// If the requested number of items is less than the paging max limit
-	// set the limit to that instead
-	queryLimit := d.QueryContext.Limit
-	var maxResults int = 1000
-	if d.QueryContext.Limit != nil {
-		if *queryLimit < 1000 {
-			maxResults = int(*queryLimit)
-		}
+	apiEndpoint := fmt.Sprintf("/rest/api/2/project/%s/components", project.ID)
+
+	req, err := client.NewRequest("GET", apiEndpoint, nil)
+	if err != nil {
+		plugin.Logger(ctx).Error("jira_component.listComponents", "get_request_error", err)
+		return nil, err
 	}
 
-	for {
-		apiEndpoint := fmt.Sprintf("/rest/api/2/project/%s/components?startAt=%d&maxResults=%d", project.ID, last, maxResults)
-
-		req, err := client.NewRequest("GET", apiEndpoint, nil)
-		if err != nil {
-			plugin.Logger(ctx).Error("jira_component.listComponents", "get_request_error", err)
-			return nil, err
+	var listResult []Component
+	res, err := client.Do(req, &listResult)
+	if err != nil {
+		defer res.Body.Close()
+		if isNotFoundError(err) {
+			return nil, nil
 		}
+		plugin.Logger(ctx).Error("jira_component.listComponents", "api_error", err)
+		plugin.Logger(ctx).Error("jira_component.listComponents", "response", slurpBody(res))
+		return nil, err
+	}
 
-		listResult := new(ListComponentResult)
-		res, err := client.Do(req, listResult)
-		if err != nil {
-			defer res.Body.Close()
-			if isNotFoundError(err) {
-				return nil, nil
-			}
-			plugin.Logger(ctx).Error("jira_component.listComponents", "api_error", err)
-			plugin.Logger(ctx).Error("jira_component.listComponents", "response", slurpBody(res))
-			return nil, err
-		}
+	for _, component := range listResult {
+		d.StreamListItem(ctx, component)
 
-		for _, component := range listResult.Values {
-			d.StreamListItem(ctx, component)
-
-			// Context may get cancelled due to manual cancellation or if the limit has been reached
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
-				return nil, nil
-			}
-		}
-
-		last = listResult.StartAt + len(listResult.Values)
-		if listResult.IsLast {
+		// Context may get cancelled due to manual cancellation or if the limit has been reached
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
 	}
+
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS

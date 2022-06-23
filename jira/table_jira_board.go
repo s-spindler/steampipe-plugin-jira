@@ -2,6 +2,7 @@ package jira
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
@@ -102,7 +103,8 @@ func listBoards(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		if err != nil {
 			defer resp.Body.Close()
 			plugin.Logger(ctx).Error("jira_board.listBoards", "api_error", err)
-			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(resp))
+			plugin.Logger(ctx).Error("jira_board.listBoards", "searchOptions", fmt.Sprintf("%+v", opt))
+			plugin.Logger(ctx).Error("jira_board.listBoards", "response", slurpBody(resp))
 			return nil, err
 		}
 

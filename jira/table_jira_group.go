@@ -71,8 +71,6 @@ func listGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		return nil, err
 	}
 
-	last := 0
-
 	// If the requested number of items is less than the paging max limit
 	// set the limit to that instead
 	queryLimit := d.QueryContext.Limit
@@ -82,41 +80,33 @@ func listGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 			maxResults = int(*queryLimit)
 		}
 	}
-	for {
-		apiEndpoint := fmt.Sprintf(
-			"/rest/api/2/group/bulk?startAt=%d&maxResults=%d",
-			last,
-			maxResults,
-		)
 
-		req, err := client.NewRequest("GET", apiEndpoint, nil)
-		if err != nil {
-			plugin.Logger(ctx).Error("jira_group.listGroups", "get_request_error", err)
-			return nil, err
-		}
+	apiEndpoint := fmt.Sprintf("/rest/api/2/groups/picker?maxResults=%d", maxResults)
 
-		listGroupResult := new(ListGroupResult)
-		res, err := client.Do(req, listGroupResult)
-		if err != nil {
-			defer res.Body.Close()
-			plugin.Logger(ctx).Error("jira_group.listGroups", "api_error", err)
-			plugin.Logger(ctx).Error("jira_group.listGroups", "response", slurpBody(res))
-			return nil, err
-		}
+	req, err := client.NewRequest("GET", apiEndpoint, nil)
+	if err != nil {
+		plugin.Logger(ctx).Error("jira_group.listGroups", "get_request_error", err)
+		return nil, err
+	}
 
-		for _, group := range listGroupResult.Groups {
-			d.StreamListItem(ctx, group)
-			// Context may get cancelled due to manual cancellation or if the limit has been reached
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
-				return nil, nil
-			}
-		}
+	listGroupResult := new(ListGroupResult)
+	res, err := client.Do(req, listGroupResult)
+	if err != nil {
+		defer res.Body.Close()
+		plugin.Logger(ctx).Error("jira_group.listGroups", "api_error", err)
+		plugin.Logger(ctx).Error("jira_group.listGroups", "response", slurpBody(res))
+		return nil, err
+	}
 
-		last = listGroupResult.StartAt + len(listGroupResult.Groups)
-		if last >= listGroupResult.Total {
+	for _, group := range listGroupResult.Groups {
+		d.StreamListItem(ctx, group)
+		// Context may get cancelled due to manual cancellation or if the limit has been reached
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
 	}
+
+	return nil, nil
 }
 
 //// HDRATE FUNCTIONS
@@ -191,7 +181,7 @@ func getGroupMembers(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 				return groupMembers, nil
 			}
 			plugin.Logger(ctx).Error("jira_group.getGroupMembers", "api_error", err)
-			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(resp))
+			plugin.Logger(ctx).Error("jira_group.getGroupMembers", "response", slurpBody(resp))
 			return nil, err
 		}
 
@@ -238,5 +228,5 @@ type ListGroupResult struct {
 
 type Group struct {
 	Name    string `json:"name"`
-	GroupId string `json:"groupId"`
+	GroupId string `json:"name"`
 }

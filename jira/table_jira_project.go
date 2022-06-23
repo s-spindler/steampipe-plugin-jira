@@ -131,16 +131,6 @@ func listProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	// If the requested number of items is less than the paging max limit
-	// set the limit to that instead
-	queryLimit := d.QueryContext.Limit
-	var maxResults int = 1000
-	if d.QueryContext.Limit != nil {
-		if *queryLimit < 1000 {
-			maxResults = int(*queryLimit)
-		}
-	}
-
 	query := ""
 	if d.KeyColumnQualString("key") != "" {
 		query = fmt.Sprintf("&%skeys=%s", query, d.KeyColumnQualString("key"))
@@ -149,45 +139,36 @@ func listProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		query = fmt.Sprintf("&%stypeKey=%s", query, d.KeyColumnQualString("project_type_key"))
 	}
 
-	last := 0
-	for {
-		apiEndpoint := fmt.Sprintf(
-			"rest/2/project/search?expand=description,lead,issueTypes,url,projectKeys,permissions,insight&startAt=%d&maxResults=%d", last,
-			maxResults,
-		)
+	apiEndpoint := "rest/api/2/project?expand=description,lead,issueTypes,url,projectKeys,permissions,insight"
 
-		if query != "" {
-			apiEndpoint = fmt.Sprintf("%s%s", apiEndpoint, query)
-		}
+	if query != "" {
+		apiEndpoint = fmt.Sprintf("%s%s", apiEndpoint, query)
+	}
 
-		req, err := client.NewRequestWithContext(ctx, "GET", apiEndpoint, nil)
-		if err != nil {
-			plugin.Logger(ctx).Error("jira_project.listProjects", "get_request_error", err)
-			return nil, err
-		}
+	req, err := client.NewRequestWithContext(ctx, "GET", apiEndpoint, nil)
+	if err != nil {
+		plugin.Logger(ctx).Error("jira_project.listProjects", "get_request_error", err)
+		return nil, err
+	}
 
-		projectList := new(ProjectListResult)
-		res, err := client.Do(req, projectList)
-		if err != nil {
-			defer res.Body.Close()
-			plugin.Logger(ctx).Error("jira_project.listProjects", "api_error", err)
-			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(res))
-			return nil, err
-		}
+	var projectList []Project
+	res, err := client.Do(req, &projectList)
+	if err != nil {
+		defer res.Body.Close()
+		plugin.Logger(ctx).Error("jira_project.listProjects", "api_error", err)
+		plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(res))
+		return nil, err
+	}
 
-		for _, project := range projectList.Values {
-			d.StreamListItem(ctx, project)
-			// Context may get cancelled due to manual cancellation or if the limit has been reached
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
-				return nil, nil
-			}
-		}
-		last = projectList.StartAt + len(projectList.Values)
-		if projectList.IsLast {
+	for _, project := range projectList {
+		d.StreamListItem(ctx, project)
+		// Context may get cancelled due to manual cancellation or if the limit has been reached
+		if d.QueryStatus.RowsRemaining(ctx) == 0 {
 			return nil, nil
 		}
 	}
 
+	return nil, nil
 }
 
 //// HYDRATE FUNCTION

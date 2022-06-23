@@ -265,7 +265,7 @@ func listIssues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 				return nil, nil
 			}
 			plugin.Logger(ctx).Error("jira_issue.listIssues", "api_error", err)
-			plugin.Logger(ctx).Error("jira_project.listProjects", "response", slurpBody(resp))
+			plugin.Logger(ctx).Error("jira_issue.listIssues", "response", slurpBody(resp))
 			return nil, err
 		}
 
